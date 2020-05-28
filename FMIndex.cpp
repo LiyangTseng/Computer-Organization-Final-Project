@@ -205,10 +205,48 @@ int** makeFMIndex(char ***suffixes, int read_count, int read_length, int F_count
 
     return L_count;
 }
+//=======================Quick Sort===========================================
+void swap(char ***arr, int a, int b){
+    char *temp=(char*)malloc(read_length*sizeof(char));
+    
+    memcpy(temp, (*arr)[a], read_length*sizeof(char));
+    memcpy((*arr)[a], (*arr)[b], read_length*sizeof(char));
+    memcpy((*arr)[b], temp, read_length*sizeof(char));
+    
+    int temp_int = SA_Final_student[a][0];
+    SA_Final_student[a][0]=SA_Final_student[b][0];
+    SA_Final_student[b][0]=temp_int;
+    temp_int = SA_Final_student[a][1];
+    SA_Final_student[a][1]=SA_Final_student[b][1];
+    SA_Final_student[b][1]=temp_int;
+}
+
+int Partition(char** SA_arr, int front, int end){
+    char* pivot = SA_arr[end];
+    int i = front -1;
+    for (int j = front; j < end; j++) {
+        if (compSuffixes(SA_arr[j],pivot,read_length) == -1 ) {
+            i++;
+            swap(&SA_arr, i, j);
+        }
+    }
+    i++;
+    swap(&SA_arr, i, end);
+    return i;
+}
+
+void QuickSort(char** SA_arr, int front, int end){
+    if (compSuffixes(SA_arr[front], SA_arr[end], read_length) >0) 
+    {
+        int pivot = Partition(SA_arr, front, end);
+        QuickSort(SA_arr, front, pivot - 1);
+        QuickSort(SA_arr, pivot + 1, end);
+    }
+}
+
 
 int** makeFMIndex_student(char ***suffixes, int read_count, int read_length, int F_count[], char *L){
     int i, j;
-
     SA_Final_student=(int**)malloc(read_count*read_length*sizeof(int*));
     for(i=0;i<read_count*read_length;i++)
         SA_Final_student[i]=(int*)malloc(2*sizeof(int));
@@ -238,21 +276,8 @@ int** makeFMIndex_student(char ***suffixes, int read_count, int read_length, int
 
     //Focus on improving this for evaluation purpose
     //Sorting of suffixes
-    for(i=0;i<read_count*read_length-1;i++){
-        for(j=0;j<read_count*read_length-i-1;j++){
-            if(compSuffixes(temp_suffixes[j], temp_suffixes[j+1], read_length)>0){
-                memcpy(temp, temp_suffixes[j], read_length*sizeof(char));
-                memcpy(temp_suffixes[j], temp_suffixes[j+1], read_length*sizeof(char));
-                memcpy(temp_suffixes[j+1], temp, read_length*sizeof(char));
-                int temp_int = SA_Final_student[j][0];
-                SA_Final_student[j][0]=SA_Final_student[j+1][0];
-                SA_Final_student[j+1][0]=temp_int;
-                temp_int = SA_Final_student[j][1];
-                SA_Final_student[j][1]=SA_Final_student[j+1][1];
-                SA_Final_student[j+1][1]=temp_int;
-            }
-        }
-    }
+    cout << "before quick sort" << endl;
+    QuickSort(temp_suffixes, 0, read_count*read_length-1);
 
     free(temp);
     char this_F = '$';
@@ -290,6 +315,10 @@ int** makeFMIndex_student(char ***suffixes, int read_count, int read_length, int
 
     return L_count;
 }
+//=======================Quick Sort===========================================
+
+
+
 //-----------------------DO NOT CHANGE--------------------------------------------
 
 int main(int argc, char *argv[]){
@@ -317,17 +346,12 @@ int main(int argc, char *argv[]){
     double time_overhead_default, time_overhead_student;
 
     gettimeofday(&TimeValue_Start, &TimeZone_Start);
-
-
     //Generate read-wise suffixes
     for(int i=0;i<read_count;i++){
         suffixes[i]=generateSuffixes(reads[i], read_length, i);
     }
-   
-
     //Calculate finl FM-Index
     L_counts = makeFMIndex(suffixes, read_count, read_length, F_counts, L);
-    
     gettimeofday(&TimeValue_Final, &TimeZone_Final);
     time_start = TimeValue_Start.tv_sec * 1000000 + TimeValue_Start.tv_usec;
     time_end = TimeValue_Final.tv_sec * 1000000 + TimeValue_Final.tv_usec;
@@ -342,16 +366,8 @@ int main(int argc, char *argv[]){
     for(int i=0;i<read_count;i++){
         suffixes[i]=generateSuffixes(reads[i], read_length, i);
     }
-   
-
     //Calculate finl FM-Index
     L_counts_student = makeFMIndex_student(suffixes, read_count, read_length, F_counts_student, L_student);
-
-    // int **SA_Final_student;
-    // int **L_counts_student;
-    // char *L_student;
-    // int F_counts_student[]={0,0,0,0};
-
     gettimeofday(&TimeValue_Final, &TimeZone_Final);
     time_start = TimeValue_Start.tv_sec * 1000000 + TimeValue_Start.tv_usec;
     //-----------Call your functions here--------------------
