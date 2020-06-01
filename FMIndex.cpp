@@ -277,7 +277,7 @@ int** makeFMIndex_student(vector<vector<string>> suffixes, int read_count, int r
 int main(int argc, char *argv[])
 {
 
-    string read_data_file= "COsmall.txt";   // input DATA
+    string read_data_file= "P1000.txt";   // input DATA
 
     vector<string> reads;
     reads = inputReads(read_data_file, read_count, read_length);//Input reads from file
@@ -318,7 +318,7 @@ int main(int argc, char *argv[])
 
 
     //-----------Your implementations------------------
-    gettimeofday(&TimeValue_Start, &TimeZone_Start);
+    // gettimeofday(&TimeValue_Start, &TimeZone_Start);
     // Generate read-wise suffixes
     for(int i=0;i<read_count;i++){
        suffixes.push_back(generateSuffixes(reads[i], read_length, i));
