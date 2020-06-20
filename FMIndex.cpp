@@ -175,7 +175,7 @@ int** makeFMIndex(vector<vector<string>> suffixes, int read_count, int read_leng
         L[i]=ch;
         if(i>0){
             for(int k=0;k<4;k++)
-                L_count[i][k]=L_count[i-1][k];
+                L_count[i][k]=L_count[i-1][k];//cumulate counts from previous results
         }
         if(ch=='A')
             L_count[i][0]++;
@@ -191,7 +191,7 @@ int** makeFMIndex(vector<vector<string>> suffixes, int read_count, int read_leng
 }
 
 
-int** makeFMIndex_student(vector<vector<string>> suffixes, int read_count, int read_length, int F_count[], char *L){
+int** makeFMIndex_student(vector<vector<string>>& suffixes, int read_count, int read_length, int (&F_count)[4], char * (&L)){
     int i, j;
 
     SA_Final_student = new int*[read_count*read_length];
@@ -237,6 +237,8 @@ int** makeFMIndex_student(vector<vector<string>> suffixes, int read_count, int r
         SA_Final_student[i] = pairs[i].second;
     }
 
+
+
     char this_F = '$';
     j=0;
     
@@ -246,7 +248,7 @@ int** makeFMIndex_student(vector<vector<string>> suffixes, int read_count, int r
         while(temp_suffixes[i][0]==this_F){
             count++;i++;
         }
-        F_count[j++]=j==0?count:count+1;
+        F_count[j++]=(j==0)?count:count+1;
         this_F = temp_suffixes[i][0];
         if(temp_suffixes[i][0]=='T')
             break;
@@ -277,12 +279,13 @@ int** makeFMIndex_student(vector<vector<string>> suffixes, int read_count, int r
 int main(int argc, char *argv[])
 {
 
-    string read_data_file= "P1000.txt";   // input DATA
+    string read_data_file= "COsmall.txt";   // input DATA
 
     vector<string> reads;
     reads = inputReads(read_data_file, read_count, read_length);//Input reads from file
 
     vector<vector<string>> suffixes;
+    vector<vector<string>> suffixes_student;
 
     //-----------------------------Structures for correctness check----------------------------------------------
     L=(char*)malloc(read_count*read_length*sizeof(char*));//Final storage for last column of sorted suffixes
@@ -299,10 +302,12 @@ int main(int argc, char *argv[])
     long time_start, time_end;
     double time_overhead_default, time_overhead_student;
 
-    gettimeofday(&TimeValue_Start, &TimeZone_Start);
 
 
     //Generate read-wise suffixes
+// /*    
+    gettimeofday(&TimeValue_Start, &TimeZone_Start);
+
     for(int i=0;i<read_count;i++){
        suffixes.push_back(generateSuffixes(reads[i], read_length, i));
     }
@@ -313,41 +318,46 @@ int main(int argc, char *argv[])
     time_start = TimeValue_Start.tv_sec * 1000000 + TimeValue_Start.tv_usec;
     time_end = TimeValue_Final.tv_sec * 1000000 + TimeValue_Final.tv_usec;
     time_overhead_default = (time_end - time_start)/1000000.0;
+// */
     //------------Time capture end----------------------
     //--------------------------------------------------
 
-
     //-----------Your implementations------------------
-    // gettimeofday(&TimeValue_Start, &TimeZone_Start);
+
+
+    gettimeofday(&TimeValue_Start, &TimeZone_Start);
+    //-----------Call your functions here--------------------
+
     // Generate read-wise suffixes
     for(int i=0;i<read_count;i++){
-       suffixes.push_back(generateSuffixes(reads[i], read_length, i));
+       suffixes_student.push_back(generateSuffixes(reads[i], read_length, i));
     }
-   
-
     //Calculate finl FM-Index
-    L_counts_student = makeFMIndex_student(suffixes, read_count, read_length, F_counts_student, L_student);
+    L_counts_student = makeFMIndex_student(suffixes_student, read_count, read_length, F_counts_student, L_student);
 
-    
+    //-----------Call your functions here--------------------
     gettimeofday(&TimeValue_Final, &TimeZone_Final);
-    time_start = TimeValue_Start.tv_sec * 1000000 + TimeValue_Start.tv_usec;
-    //-----------Call your functions here--------------------
 
-    //-----------Call your functions here--------------------
+
+    time_start = TimeValue_Start.tv_sec * 1000000 + TimeValue_Start.tv_usec;
     time_end = TimeValue_Final.tv_sec * 1000000 + TimeValue_Final.tv_usec;
     time_overhead_student = (time_end - time_start)/1000000.0;
+    cout << "time_overhead_student" << time_overhead_student << "seconds" << endl;
+    cout << "time_overhead_default" << time_overhead_default << "seconds" << endl;
     //--------------------------------------------------
 
     //----------------For debug purpose only-----------------
-    //for(int i=0;i<read_count*read_length;i++)        
+    // for(int i=0;i<read_count*read_length;i++)        
     //    cout<<L[i]<<"\t"<<SA_Final[i][0]<<","<<SA_Final[i][1]<<"\t"<<L_counts[i][0]<<","<<L_counts[i][1]<<","<<L_counts[i][2]<<","<<L_counts[i][3]<<endl;
-    //--------------------------------------------------
+    //--------------------------------------------------4
 
     //---------------Correction check and speedup calculation----------------------
+// /*
     float speedup=0.0;
     if(checker()==1)
        speedup = time_overhead_default/time_overhead_student;
     cout<<"Speedup="<<speedup<<endl;
+// */
     //-----------------------------------------------------------------------------
     
     //dynamicallly free space
