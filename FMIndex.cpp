@@ -36,17 +36,14 @@ int F_counts[]={0,0,0,0};
 
 
 //Read file to get reads
-vector<string> inputReads(string file_path, int &read_count, int &length){
+void inputReads(vector<string> &reads, string &file_path){
     fstream read_file(file_path);
     int ch, lines=0;
-    vector<string> reads;
     string line;
     while (read_file>>line)
         reads.push_back(line);
     read_count = reads.size();
     read_length = reads[0].length();
-     
-    return reads;
 }
 
 //Check correctness of values
@@ -71,24 +68,22 @@ int checker(){
     return correct;
 }
 
-//Rotate read by 1 character
-void rotateRead(char *read, char *rotatedRead, int length){
-    for(int i=0;i<length-1;i++)
-        rotatedRead[i]=read[i+1];
-    rotatedRead[length-1]=read[0];
-}
 
 //Generate Sufixes and their SA's for a read
-vector<string> generateSuffixes(string read, int length, int read_id){
-    vector<string> suffixes;
-    suffixes.push_back(read);
-
-    for(int i=1;i<length;i++){
-        string s = read;
-        rotate(s.begin(), s.begin() + i, s.end());
-        suffixes.push_back(s);
+void generateSuffixes(vector<vector<string>> &suffixes, vector<string> &reads){
+    // vector<string> suffixes;
+    for (int i=0; i<read_count; i++)
+    {
+        vector<string> suffixesOfOneString;
+        for (int j=0; j<read_length; j++)
+        {
+            string s = reads[i];
+            //Rotate read by 1 character using std::rotate()
+            rotate(s.begin(), s.begin() + j, s.end());
+            suffixesOfOneString.push_back(s);
+        }
+        suffixes.push_back(suffixesOfOneString);
     }
-    return suffixes;
 }
 
 //Comparator for Suffixes
@@ -191,7 +186,7 @@ int** makeFMIndex(vector<vector<string>> suffixes, int read_count, int read_leng
 }
 
 
-int** makeFMIndex_student(vector<vector<string>>& suffixes, int read_count, int read_length, int (&F_count)[4], char * (&L)){
+int** makeFMIndex_student(vector<vector<string>>& suffixes, int (&F_count)[4], char * (&L)){
     int i, j;
 
     SA_Final_student = new int*[read_count*read_length];
@@ -278,11 +273,10 @@ int** makeFMIndex_student(vector<vector<string>>& suffixes, int read_count, int 
 
 int main(int argc, char *argv[])
 {
-
     string read_data_file= "COsmall.txt";   // input DATA
 
     vector<string> reads;
-    reads = inputReads(read_data_file, read_count, read_length);//Input reads from file
+    inputReads(reads, read_data_file);//Input reads from file
 
     vector<vector<string>> suffixes;
     vector<vector<string>> suffixes_student;
@@ -302,15 +296,11 @@ int main(int argc, char *argv[])
     long time_start, time_end;
     double time_overhead_default, time_overhead_student;
 
-
-
-    //Generate read-wise suffixes
+   //Generate read-wise suffixes
 // /*    
     gettimeofday(&TimeValue_Start, &TimeZone_Start);
 
-    for(int i=0;i<read_count;i++){
-       suffixes.push_back(generateSuffixes(reads[i], read_length, i));
-    }
+    generateSuffixes(suffixes, reads);
     //Calculate finl FM-Index
     L_counts = makeFMIndex(suffixes, read_count, read_length, F_counts, L);
     
@@ -321,19 +311,16 @@ int main(int argc, char *argv[])
 // */
     //------------Time capture end----------------------
     //--------------------------------------------------
-
     //-----------Your implementations------------------
-
 
     gettimeofday(&TimeValue_Start, &TimeZone_Start);
     //-----------Call your functions here--------------------
 
     // Generate read-wise suffixes
-    for(int i=0;i<read_count;i++){
-       suffixes_student.push_back(generateSuffixes(reads[i], read_length, i));
-    }
+    generateSuffixes(suffixes_student, reads);
+    
     //Calculate finl FM-Index
-    L_counts_student = makeFMIndex_student(suffixes_student, read_count, read_length, F_counts_student, L_student);
+    L_counts_student = makeFMIndex_student(suffixes_student, F_counts_student, L_student);
 
     //-----------Call your functions here--------------------
     gettimeofday(&TimeValue_Final, &TimeZone_Final);
