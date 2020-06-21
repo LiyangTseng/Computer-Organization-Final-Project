@@ -271,7 +271,7 @@ int to_index(const char v)
     case 'C': return 2;
     case 'G': return 3;
     case 'T': return 4;
-    case 'T'+1: return 0;
+    // case 'T'+1: return 0;
     default: return -1;
     }
 }
@@ -349,8 +349,8 @@ int main(int argc, char *argv[])
     int i = queryString.length()-1;
     char c = queryString[queryString.length()-1];
     int First = C[to_index(c)]+1;
-    int temp = to_index(c+1);
-    int Last = C[to_index(c+1)];
+    // int temp = to_index(c+1);
+    int Last = (to_index(c)+1==5)? read_count*read_length: C[to_index(c)+1];
 
     while ((First <= Last) && i >= 2)
     {
