@@ -33,6 +33,7 @@ int **SA_Final;
 int **L_counts;
 char *L;
 int F_counts[]={0,0,0,0};
+int C[]={0,0,0,0,0};//C[c] = total # of text characters which are alphabetically smaller than c
 
 
 //Read file to get reads
@@ -41,7 +42,10 @@ void inputReads(vector<string> &reads, string &file_path){
     int ch, lines=0;
     string line;
     while (read_file>>line)
+    {
+        line += '$';
         reads.push_back(line);
+    }
     read_count = reads.size();
     read_length = reads[0].length();
 }
@@ -85,19 +89,6 @@ void generateSuffixes(vector<vector<string>> &suffixes, vector<string> &reads){
         suffixes.push_back(suffixesOfOneString);
     }
 }
-
-//Comparator for Suffixes
-int compSuffixes(char *suffix1, char *suffix2, int length){
-    int ret = 0;
-    for(int i=0;i<length;i++){
-        if(suffix1[i]>suffix2[i])
-            return 1;
-        else if(suffix1[i]<suffix2[i])
-            return -1;
-    }
-    return ret;
-}
-
 
 //Calculates the final FM-Index
 int** makeFMIndex(vector<vector<string>> suffixes, int read_count, int read_length, int F_count[], char *L){
@@ -185,8 +176,8 @@ int** makeFMIndex(vector<vector<string>> suffixes, int read_count, int read_leng
     return L_count;
 }
 
-
-int** makeFMIndex_student(vector<vector<string>>& suffixes, int (&F_count)[4], char * (&L)){
+//Calculates the final FM-Index -- student version
+void makeFMIndex_student(vector<vector<string>>& suffixes, int (&F_count)[4], char * (&L)){
     int i, j;
 
     SA_Final_student = new int*[read_count*read_length];
@@ -206,13 +197,12 @@ int** makeFMIndex_student(vector<vector<string>>& suffixes, int (&F_count)[4], c
     }
     
     string temp;
-    
-    int** L_count = new int*[read_length*read_count];
+    L_counts_student = new int*[read_length*read_count];
     for (int i=0; i<read_length*read_count; i++)
     {
-        L_count[i] = new int[4];
-        for(j=0;j<4;j++){
-            L_count[i][j]=0;
+        L_counts_student[i] = new int[5];
+        for(j=0;j<5;j++){
+            L_counts_student[i][j]=0;
         }
     }
     vector<pair<string, int*> >pairs;
@@ -249,31 +239,47 @@ int** makeFMIndex_student(vector<vector<string>>& suffixes, int (&F_count)[4], c
             break;
     }
     
-    //Calculation of L's and L_count's
+    //Calculation of L's and L_counts_student's
     for(i=0;i<read_count*read_length;i++){
         char ch = temp_suffixes[i][read_length-1];
         L_student[i]=ch;
         if(i>0){
-            for(int k=0;k<4;k++)
-                L_count[i][k]=L_count[i-1][k];
+            for(int k=0;k<5;k++)
+                L_counts_student[i][k]=L_counts_student[i-1][k];
         }
-        if(ch=='A')
-            L_count[i][0]++;
+        if (ch=='$')
+            L_counts_student[i][0]++;
+        else if(ch=='A')
+            L_counts_student[i][1]++;
         else if(ch=='C')
-            L_count[i][1]++;
+            L_counts_student[i][2]++;
         else if(ch=='G')
-            L_count[i][2]++;
+            L_counts_student[i][3]++;
         else if(ch=='T')
-            L_count[i][3]++;
+            L_counts_student[i][4]++;
     }
 
-    return L_count;
+    // return L_counts_student;
+}
+
+int to_index(const char v)
+{
+    switch(v)
+    {
+    case '$': return 0;
+    case 'A': return 1;
+    case 'C': return 2;
+    case 'G': return 3;
+    case 'T': return 4;
+    case 'T'+1: return 0;
+    default: return -1;
+    }
 }
 //-----------------------DO NOT CHANGE--------------------------------------------
 
 int main(int argc, char *argv[])
 {
-    string read_data_file= "COsmall.txt";   // input DATA
+    string read_data_file= "test.txt";   // input DATA
 
     vector<string> reads;
     inputReads(reads, read_data_file);//Input reads from file
@@ -297,7 +303,7 @@ int main(int argc, char *argv[])
     double time_overhead_default, time_overhead_student;
 
    //Generate read-wise suffixes
-// /*    
+/*    
     gettimeofday(&TimeValue_Start, &TimeZone_Start);
 
     generateSuffixes(suffixes, reads);
@@ -308,20 +314,56 @@ int main(int argc, char *argv[])
     time_start = TimeValue_Start.tv_sec * 1000000 + TimeValue_Start.tv_usec;
     time_end = TimeValue_Final.tv_sec * 1000000 + TimeValue_Final.tv_usec;
     time_overhead_default = (time_end - time_start)/1000000.0;
-// */
+    cout << "time_overhead_default" << time_overhead_default << "seconds" << endl;
+    
+*/
     //------------Time capture end----------------------
     //--------------------------------------------------
-    //-----------Your implementations------------------
 
+    // -----------Your implementations------------------
     gettimeofday(&TimeValue_Start, &TimeZone_Start);
+
+    string queryString;//string to search
+    cout << "enter your query" << endl;
+    cin >> queryString;
+    int matcheCount = 0;//number of matches found
+
     //-----------Call your functions here--------------------
 
     // Generate read-wise suffixes
     generateSuffixes(suffixes_student, reads);
     
     //Calculate finl FM-Index
-    L_counts_student = makeFMIndex_student(suffixes_student, F_counts_student, L_student);
+    makeFMIndex_student(suffixes_student, F_counts_student, L_student);
+    
+    for(int i=0;i<read_count*read_length;i++)        
+        cout<<L_student[i]<<"\t"<<L_counts_student[i][0]<<","<<L_counts_student[i][1]<<","<<L_counts_student[i][2]<<","<<L_counts_student[i][3]<<","<<L_counts_student[i][4]<<endl;
 
+    for (int i=1; i<5; i++)
+    {
+        for (int j=0; j<i; j++)
+        {
+            C[i] += F_counts_student[j];
+        }
+    }    
+    int i = queryString.length()-1;
+    char c = queryString[queryString.length()-1];
+    int First = C[to_index(c)]+1;
+    int temp = to_index(c+1);
+    int Last = C[to_index(c+1)];
+
+    while ((First <= Last) && i >= 2)
+    {
+        c = queryString[i-1];
+        First = C[to_index(c)] + L_counts_student[First-1][to_index(c)] + 1;
+        Last = C[to_index(c)] + L_counts_student[Last][to_index(c)];
+        i--;
+    }
+    
+    if (Last < First)
+        cout << "no occurence" << endl;
+    else
+        cout << "(" << First << ", " << Last << ")" << endl;    
     //-----------Call your functions here--------------------
     gettimeofday(&TimeValue_Final, &TimeZone_Final);
 
@@ -330,30 +372,31 @@ int main(int argc, char *argv[])
     time_end = TimeValue_Final.tv_sec * 1000000 + TimeValue_Final.tv_usec;
     time_overhead_student = (time_end - time_start)/1000000.0;
     cout << "time_overhead_student" << time_overhead_student << "seconds" << endl;
-    cout << "time_overhead_default" << time_overhead_default << "seconds" << endl;
     //--------------------------------------------------
 
     //----------------For debug purpose only-----------------
-    // for(int i=0;i<read_count*read_length;i++)        
-    //    cout<<L[i]<<"\t"<<SA_Final[i][0]<<","<<SA_Final[i][1]<<"\t"<<L_counts[i][0]<<","<<L_counts[i][1]<<","<<L_counts[i][2]<<","<<L_counts[i][3]<<endl;
-    //--------------------------------------------------4
+/*    
+    for(int i=0;i<read_count*read_length;i++)        
+       cout<<L[i]<<"\t"<<SA_Final[i][0]<<","<<SA_Final[i][1]<<"\t"<<L_counts[i][0]<<","<<L_counts[i][1]<<","<<L_counts[i][2]<<","<<L_counts[i][3]<<endl;
 
+    //--------------------------------------------------
+*/
     //---------------Correction check and speedup calculation----------------------
-// /*
+/*
     float speedup=0.0;
     if(checker()==1)
        speedup = time_overhead_default/time_overhead_student;
     cout<<"Speedup="<<speedup<<endl;
-// */
     //-----------------------------------------------------------------------------
+*/
     
     //dynamicallly free space
     for (int i=0; i<read_count*read_length; i++)
     {
-        delete []SA_Final[i];
+        // delete []SA_Final[i];
         delete []SA_Final_student[i];
     }
-    delete []SA_Final;
+    // delete []SA_Final;
     delete []SA_Final_student;
 
     return 0;
