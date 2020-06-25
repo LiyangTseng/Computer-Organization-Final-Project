@@ -222,10 +222,10 @@ void makeFMIndex_student(vector<vector<string>>& suffixes, int (&F_count)[4], ch
         SA_Final_student[i] = pairs[i].second;
     }
 
-    cout << endl;
-    for (int i=0; i<temp_suffixes.size(); i++)
-        cout << temp_suffixes[i] << endl;
-    cout << endl;
+    // cout << endl;
+    // for (int i=0; i<temp_suffixes.size(); i++)
+    //     cout << temp_suffixes[i] << endl;
+    // cout << endl;
 
     char this_F = '$';
     j=0;
@@ -339,8 +339,12 @@ int main(int argc, char *argv[])
     //Calculate finl FM-Index
     makeFMIndex_student(suffixes_student, F_counts_student, L_student);
     
+        //----------------For debug purpose only-----------------
+/*  
     for(int i=0;i<read_count*read_length;i++)        
-        cout<<L_student[i]<<"\t"<<L_counts_student[i][0]<<","<<L_counts_student[i][1]<<","<<L_counts_student[i][2]<<","<<L_counts_student[i][3]<<","<<L_counts_student[i][4]<<endl;
+        cout<<L_student[i]<<"\t"<<SA_Final_student[i][0]<<","<<SA_Final_student[i][1]<<"\t"<<L_counts_student[i][0]<<","<<L_counts_student[i][1]<<","<<L_counts_student[i][2]<<","<<L_counts_student[i][3]<<","<<L_counts_student[i][4]<<endl;
+*/
+    //--------------------------------------------------
 
     for (int i=1; i<5; i++)
     {
@@ -349,12 +353,12 @@ int main(int argc, char *argv[])
             C[i] += F_counts_student[j];
         }
     }    
-    cout << endl;
-    cout << "C table:" <<  endl;
-    for (int i=0; i<5; i++)
-        cout << C[i] << " ";
-    cout << endl;
-    cout << endl;
+    // cout << endl;
+    // cout << "C table:" <<  endl;
+    // for (int i=0; i<5; i++)
+    //     cout << C[i] << " ";
+    // cout << endl;
+    // cout << endl;
 
     int i = 0;
     int j = read_length-1;
@@ -372,12 +376,23 @@ int main(int argc, char *argv[])
             break;
         // cout << i << "~" << j << endl;
     }
-    if (i<j)
-        cout << "occurence at index " << i << "~" << j << endl;
-    else if (i==j)
-        cout << "occurence at index " << i << endl;
-    else
-        cout << "no occurence" << endl;    
+    // if (i<j)
+    //     cout << "occurence at index " << i << "~" << j << endl;
+    // else if (i==j)
+    //     cout << "occurence at index " << i << endl;
+    // else
+    //     cout << "no occurence" << endl;    
+
+    vector<int> counter;
+    for (int k=i; k<=j; k++)
+    {
+        //concept: if SA_Final_student[k][1] is new => increment counter 
+        //might be the key of performance!!
+        if(std::find(counter.begin(), counter.end(), SA_Final_student[k][1]) == counter.end()) 
+            counter.push_back(SA_Final_student[k][1]);
+
+    }
+    cout << "result: " << counter.size() << endl;
     //-----------Call your functions here--------------------
     gettimeofday(&TimeValue_Final, &TimeZone_Final);
 
@@ -388,13 +403,6 @@ int main(int argc, char *argv[])
     cout << "time_overhead_student" << time_overhead_student << "seconds" << endl;
     //--------------------------------------------------
 
-    //----------------For debug purpose only-----------------
-/*    
-    for(int i=0;i<read_count*read_length;i++)        
-       cout<<L[i]<<"\t"<<SA_Final[i][0]<<","<<SA_Final[i][1]<<"\t"<<L_counts[i][0]<<","<<L_counts[i][1]<<","<<L_counts[i][2]<<","<<L_counts[i][3]<<endl;
-
-    //--------------------------------------------------
-*/
     //---------------Correction check and speedup calculation----------------------
 /*
     float speedup=0.0;
