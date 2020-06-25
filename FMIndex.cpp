@@ -222,7 +222,10 @@ void makeFMIndex_student(vector<vector<string>>& suffixes, int (&F_count)[4], ch
         SA_Final_student[i] = pairs[i].second;
     }
 
-
+    cout << endl;
+    for (int i=0; i<temp_suffixes.size(); i++)
+        cout << temp_suffixes[i] << endl;
+    cout << endl;
 
     char this_F = '$';
     j=0;
@@ -346,24 +349,35 @@ int main(int argc, char *argv[])
             C[i] += F_counts_student[j];
         }
     }    
-    int i = queryString.length()-1;
-    char c = queryString[queryString.length()-1];
-    int First = C[to_index(c)]+1;
-    // int temp = to_index(c+1);
-    int Last = (to_index(c)+1==5)? read_count*read_length: C[to_index(c)+1];
+    cout << endl;
+    cout << "C table:" <<  endl;
+    for (int i=0; i<5; i++)
+        cout << C[i] << " ";
+    cout << endl;
+    cout << endl;
 
-    while ((First <= Last) && i >= 2)
+    int i = 0;
+    int j = read_length-1;
+    char c;
+    for (int k=queryString.length()-1; k>=0; k--)
     {
-        c = queryString[i-1];
-        First = C[to_index(c)] + L_counts_student[First-1][to_index(c)] + 1;
-        Last = C[to_index(c)] + L_counts_student[Last][to_index(c)];
-        i--;
-    }
+        c = queryString[k];
+        if (i-1 < 0)
+            i = C[to_index(c)] + 0;
+        else    
+            i = C[to_index(c)] + L_counts_student[i-1][to_index(c)];
+        j = C[to_index(c)] + L_counts_student[j][to_index(c)]-1;
     
-    if (Last < First)
-        cout << "no occurence" << endl;
+        if (i >= j)
+            break;
+        // cout << i << "~" << j << endl;
+    }
+    if (i<j)
+        cout << "occurence at index " << i << "~" << j << endl;
+    else if (i==j)
+        cout << "occurence at index " << i << endl;
     else
-        cout << "(" << First << ", " << Last << ")" << endl;    
+        cout << "no occurence" << endl;    
     //-----------Call your functions here--------------------
     gettimeofday(&TimeValue_Final, &TimeZone_Final);
 
