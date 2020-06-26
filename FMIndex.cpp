@@ -18,7 +18,8 @@ using namespace std;
 int **SA_Final_student;
 int **L_counts_student;
 char *L_student;
-int F_counts_student[]={0,0,0,0};
+// int F_counts_student[]={0,0,0,0};
+int C[]={0,0,0,0,0};//C[c] = total # of text characters which are alphabetically smaller than c
 //--------------------------------------------------------------------------------
 
 //----------------------------------------------------------------------------------------------------------
@@ -28,13 +29,12 @@ int F_counts_student[]={0,0,0,0};
 
 int read_count = 0;
 int read_length = 0;
-
+/*
 int **SA_Final;
 int **L_counts;
 char *L;
 int F_counts[]={0,0,0,0};
-int C[]={0,0,0,0,0};//C[c] = total # of text characters which are alphabetically smaller than c
-
+*/
 
 //Read file to get reads
 void inputReads(vector<string> &reads, string &file_path){
@@ -51,6 +51,7 @@ void inputReads(vector<string> &reads, string &file_path){
 }
 
 //Check correctness of values
+/*
 int checker(){
     int correct = 1;
     for(int i=0; i<read_count*read_length;i++){
@@ -71,7 +72,7 @@ int checker(){
     }
     return correct;
 }
-
+*/
 
 //Generate Sufixes and their SA's for a read
 void generateSuffixes(vector<vector<string>> &suffixes, vector<string> &reads){
@@ -91,6 +92,7 @@ void generateSuffixes(vector<vector<string>> &suffixes, vector<string> &reads){
 }
 
 //Calculates the final FM-Index
+/*
 int** makeFMIndex(vector<vector<string>> suffixes, int read_count, int read_length, int F_count[], char *L){
     int i, j;
 
@@ -175,9 +177,12 @@ int** makeFMIndex(vector<vector<string>> suffixes, int read_count, int read_leng
 
     return L_count;
 }
+*/
 
 //Calculates the final FM-Index -- student version
-void makeFMIndex_student(vector<vector<string>>& suffixes, int (&F_count)[4], char * (&L)){
+// void makeFMIndex_student(vector<vector<string>>& suffixes, int (&F_count)[4], char * (&L)){
+void makeFMIndex_student(vector<vector<string>>& suffixes, char * (&L)){
+
     int i, j;
 
     SA_Final_student = new int*[read_count*read_length];
@@ -221,16 +226,17 @@ void makeFMIndex_student(vector<vector<string>>& suffixes, int (&F_count)[4], ch
         temp_suffixes[i] = pairs[i].first;
         SA_Final_student[i] = pairs[i].second;
     }
-
-    // cout << endl;
-    // for (int i=0; i<temp_suffixes.size(); i++)
-    //     cout << temp_suffixes[i] << endl;
-    // cout << endl;
-
+/*
+    cout << endl;
+    for (int i=0; i<temp_suffixes.size(); i++)
+        cout << temp_suffixes[i] << endl;
+    cout << endl;
+*/
     char this_F = '$';
     j=0;
     
     //Calculation of F_count's
+/*
     for(i=0;i<read_count*read_length;i++){
         int count=0;
         while(temp_suffixes[i][0]==this_F){
@@ -241,7 +247,7 @@ void makeFMIndex_student(vector<vector<string>>& suffixes, int (&F_count)[4], ch
         if(temp_suffixes[i][0]=='T')
             break;
     }
-    
+*/    
     //Calculation of L's and L_counts_student's
     for(i=0;i<read_count*read_length;i++){
         char ch = temp_suffixes[i][read_length-1];
@@ -282,16 +288,16 @@ int to_index(const char v)
 
 int main(int argc, char *argv[])
 {
-    string read_data_file= "COsmall.txt";   // input DATA
+    string read_data_file= "P10000.txt";   // input DATA
 
     vector<string> reads;
     inputReads(reads, read_data_file);//Input reads from file
 
-    vector<vector<string>> suffixes;
+    // vector<vector<string>> suffixes;
     vector<vector<string>> suffixes_student;
 
     //-----------------------------Structures for correctness check----------------------------------------------
-    L=(char*)malloc(read_count*read_length*sizeof(char*));//Final storage for last column of sorted suffixes
+    // L=(char*)malloc(read_count*read_length*sizeof(char*));//Final storage for last column of sorted suffixes
     L_student=(char*)malloc(read_count*read_length*sizeof(char*));//Final storage for last column of sorted suffixes
     //-----------------------------Structures for correctness check----------------------------------------------
     
@@ -334,7 +340,7 @@ int main(int argc, char *argv[])
     generateSuffixes(suffixes_student, reads);
     
     //Calculate finl FM-Index
-    makeFMIndex_student(suffixes_student, F_counts_student, L_student);
+    makeFMIndex_student(suffixes_student, L_student);
     
     //----------------For debug purpose only-----------------
 /*  
@@ -342,21 +348,19 @@ int main(int argc, char *argv[])
         cout<<L_student[i]<<"\t"<<SA_Final_student[i][0]<<","<<SA_Final_student[i][1]<<"\t"<<L_counts_student[i][0]<<","<<L_counts_student[i][1]<<","<<L_counts_student[i][2]<<","<<L_counts_student[i][3]<<","<<L_counts_student[i][4]<<endl;
 */
     //--------------------------------------------------
-    //calculate C table
-    int summation = 0;
-    for (int i=1; i<5; i++)
-    {
-        summation += F_counts_student[i-1];
-        C[i] = summation;
-    }    
-
-    // cout << endl;
-    // cout << "C table:" <<  endl;
-    // for (int i=0; i<5; i++)
-    //     cout << C[i] << " ";
-    // cout << endl;
-    // cout << endl;
-
+    C[1] = L_counts_student[read_count*read_length-1][0];//A=moneysign
+    C[2] = C[1]+L_counts_student[read_count*read_length-1][1];//C=moneysign+A
+    C[3] = C[2]+L_counts_student[read_count*read_length-1][2];//G=moneysign+A+C
+    C[4] = C[3]+L_counts_student[read_count*read_length-1][3];//G=moneysign+A+C+G
+    
+// /*
+    cout << endl;
+    cout << "C table:" <<  endl;
+    for (int i=0; i<5; i++)
+        cout << C[i] << " ";
+    cout << endl;
+    cout << endl;
+// */
     int i = 0;
     int j = read_count*read_length-1;
     char c = queryString[queryString.length()-1];
@@ -377,13 +381,14 @@ int main(int argc, char *argv[])
         }
 
     }
-    // if (i<j)
-    //     cout << "occurence at index " << i << "~" << j << endl;
-    // else if (i==j)
-    //     cout << "occurence at index " << i << endl;
-    // else
-    //     cout << "no occurence" << endl;    
-
+/*
+    if (i<j)
+        cout << "occurence at index " << i << "~" << j << endl;
+    else if (i==j)
+        cout << "occurence at index " << i << endl;
+    else
+        cout << "no occurence" << endl;    
+*/
     vector<int> counter;
     for (int k=i; k<=j; k++)
     {
