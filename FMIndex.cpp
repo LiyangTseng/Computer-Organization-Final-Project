@@ -19,8 +19,8 @@ using namespace std;
 int **SA_Final_student;
 int **L_counts_student;
 char *L_student;
-// int F_counts_student[]={0,0,0,0};
 int C[]={0,0,0,0,0};//C[c] = total # of text characters which are alphabetically smaller than c
+vector<pair<string, int*> >pairs;
 map<char, int> charIndex = {
     {'$',0},
     {'A',1},
@@ -218,7 +218,6 @@ void makeFMIndex_student(vector<vector<string>>& suffixes, char * (&L)){
             L_counts_student[i][j]=0;
         }
     }
-    vector<pair<string, int*> >pairs;
     for (int i=0; i<read_count*read_length; i++)
         pairs.push_back(make_pair(temp_suffixes[i], SA_Final_student[i]));
     
@@ -228,12 +227,7 @@ void makeFMIndex_student(vector<vector<string>>& suffixes, char * (&L)){
     [](pair<string, int*> &p1, pair<string, int*> &p2) -> bool{ 
         return p1.first<p2.first; 
     });
-
-    for (int i=0; i<read_count*read_length; i++)
-    {
-        temp_suffixes[i] = pairs[i].first;
-        SA_Final_student[i] = pairs[i].second;
-    }
+//----------------For debug purpose only - temp_suffixes-----------------
 /*
     cout << endl;
     for (int i=0; i<temp_suffixes.size(); i++)
@@ -245,7 +239,8 @@ void makeFMIndex_student(vector<vector<string>>& suffixes, char * (&L)){
     
     //Calculation of L's and L_counts_student's
     for(i=0;i<read_count*read_length;i++){
-        char ch = temp_suffixes[i][read_length-1];
+        // char ch = temp_suffixes[i][read_length-1];
+        char ch = pairs[i].first[read_length-1];
         L_student[i]=ch;
         if(i>0){
             for(int k=0;k<5;k++)
@@ -316,7 +311,7 @@ int main(int argc, char *argv[])
     //----------------For debug purpose only-----------------
 /*  
     for(int i=0;i<read_count*read_length;i++)        
-        cout<<L_student[i]<<"\t"<<SA_Final_student[i][0]<<","<<SA_Final_student[i][1]<<"\t"<<L_counts_student[i][0]<<","<<L_counts_student[i][1]<<","<<L_counts_student[i][2]<<","<<L_counts_student[i][3]<<","<<L_counts_student[i][4]<<endl;
+        cout<<L_student[i]<<"\t"<<pairs[i].second[0]<<","<<pairs[i].second[1]<<"\t"<<L_counts_student[i][0]<<","<<L_counts_student[i][1]<<","<<L_counts_student[i][2]<<","<<L_counts_student[i][3]<<","<<L_counts_student[i][4]<<endl;
 */
     //--------------------------------------------------
     C[1] = L_counts_student[read_count*read_length-1][0];//A=moneysign
@@ -324,6 +319,7 @@ int main(int argc, char *argv[])
     C[3] = C[2]+L_counts_student[read_count*read_length-1][2];//G=moneysign+A+C
     C[4] = C[3]+L_counts_student[read_count*read_length-1][3];//G=moneysign+A+C+G
     
+    //----------------For debug purpose only - C table -----------------
 /*
     cout << endl;
     cout << "C table:" <<  endl;
@@ -350,7 +346,6 @@ int main(int argc, char *argv[])
                 break;
             // cout << i << "~" << j << endl;
         }
-
     }
 /*
     if (i<j)
@@ -366,8 +361,9 @@ int main(int argc, char *argv[])
         //concept: if SA_Final_student[k][1] is new => increment counter 
         //might be the key of performance!!
         //https://stackoverflow.com/questions/3450860/check-if-a-stdvector-contains-a-certain-object
-        if(std::find(counter.begin(), counter.end(), SA_Final_student[k][1]) == counter.end()) 
-            counter.push_back(SA_Final_student[k][1]);
+        
+        if(std::find(counter.begin(), counter.end(), pairs[k].second[1]) == counter.end()) 
+            counter.push_back(pairs[k].second[1]);
 
     }
     //-----------Call your functions here--------------------
