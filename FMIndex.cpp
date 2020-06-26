@@ -282,7 +282,7 @@ int to_index(const char v)
 
 int main(int argc, char *argv[])
 {
-    string read_data_file= "test.txt";   // input DATA
+    string read_data_file= "COsmall.txt";   // input DATA
 
     vector<string> reads;
     inputReads(reads, read_data_file);//Input reads from file
@@ -318,19 +318,16 @@ int main(int argc, char *argv[])
     time_end = TimeValue_Final.tv_sec * 1000000 + TimeValue_Final.tv_usec;
     time_overhead_default = (time_end - time_start)/1000000.0;
     cout << "time_overhead_default" << time_overhead_default << "seconds" << endl;
+    //------------Time capture end----------------------
     
 */
-    //------------Time capture end----------------------
     //--------------------------------------------------
-
-    // -----------Your implementations------------------
-    gettimeofday(&TimeValue_Start, &TimeZone_Start);
 
     string queryString;//string to search
     cout << "enter your query" << endl;
     cin >> queryString;
-    int matcheCount = 0;//number of matches found
-
+    // -----------Your implementations------------------
+    gettimeofday(&TimeValue_Start, &TimeZone_Start); 
     //-----------Call your functions here--------------------
 
     // Generate read-wise suffixes
@@ -339,20 +336,20 @@ int main(int argc, char *argv[])
     //Calculate finl FM-Index
     makeFMIndex_student(suffixes_student, F_counts_student, L_student);
     
-        //----------------For debug purpose only-----------------
+    //----------------For debug purpose only-----------------
 /*  
     for(int i=0;i<read_count*read_length;i++)        
         cout<<L_student[i]<<"\t"<<SA_Final_student[i][0]<<","<<SA_Final_student[i][1]<<"\t"<<L_counts_student[i][0]<<","<<L_counts_student[i][1]<<","<<L_counts_student[i][2]<<","<<L_counts_student[i][3]<<","<<L_counts_student[i][4]<<endl;
 */
     //--------------------------------------------------
-
+    //calculate C table
+    int summation = 0;
     for (int i=1; i<5; i++)
     {
-        for (int j=0; j<i; j++)
-        {
-            C[i] += F_counts_student[j];
-        }
+        summation += F_counts_student[i-1];
+        C[i] = summation;
     }    
+
     // cout << endl;
     // cout << "C table:" <<  endl;
     // for (int i=0; i<5; i++)
@@ -361,20 +358,24 @@ int main(int argc, char *argv[])
     // cout << endl;
 
     int i = 0;
-    int j = read_length-1;
-    char c;
-    for (int k=queryString.length()-1; k>=0; k--)
+    int j = read_count*read_length-1;
+    char c = queryString[queryString.length()-1];
+    i = C[to_index(c)] + 0;
+    j = C[to_index(c)] + L_counts_student[j][to_index(c)]-1;
+
+    if (i < j)
     {
-        c = queryString[k];
-        if (i-1 < 0)
-            i = C[to_index(c)] + 0;
-        else    
+        for (int k=queryString.length()-2; k>=0; k--)
+        {
+            c = queryString[k];
             i = C[to_index(c)] + L_counts_student[i-1][to_index(c)];
-        j = C[to_index(c)] + L_counts_student[j][to_index(c)]-1;
-    
-        if (i >= j)
-            break;
-        // cout << i << "~" << j << endl;
+            j = C[to_index(c)] + L_counts_student[j][to_index(c)]-1;
+        
+            if (i >= j)
+                break;
+            // cout << i << "~" << j << endl;
+        }
+
     }
     // if (i<j)
     //     cout << "occurence at index " << i << "~" << j << endl;
@@ -388,11 +389,11 @@ int main(int argc, char *argv[])
     {
         //concept: if SA_Final_student[k][1] is new => increment counter 
         //might be the key of performance!!
+        //https://stackoverflow.com/questions/3450860/check-if-a-stdvector-contains-a-certain-object
         if(std::find(counter.begin(), counter.end(), SA_Final_student[k][1]) == counter.end()) 
             counter.push_back(SA_Final_student[k][1]);
 
     }
-    cout << "result: " << counter.size() << endl;
     //-----------Call your functions here--------------------
     gettimeofday(&TimeValue_Final, &TimeZone_Final);
 
@@ -400,6 +401,7 @@ int main(int argc, char *argv[])
     time_start = TimeValue_Start.tv_sec * 1000000 + TimeValue_Start.tv_usec;
     time_end = TimeValue_Final.tv_sec * 1000000 + TimeValue_Final.tv_usec;
     time_overhead_student = (time_end - time_start)/1000000.0;
+    cout << "number of occurences: " << counter.size() << endl;
     cout << "time_overhead_student" << time_overhead_student << "seconds" << endl;
     //--------------------------------------------------
 
