@@ -8,6 +8,7 @@
 #include <vector>
 #include <algorithm>
 #include <utility>
+#include <map>
 using namespace std;
 
 //-----------------------DO NOT CHANGE NAMES, ONLY MODIFY VALUES--------------------------------------------
@@ -20,6 +21,13 @@ int **L_counts_student;
 char *L_student;
 // int F_counts_student[]={0,0,0,0};
 int C[]={0,0,0,0,0};//C[c] = total # of text characters which are alphabetically smaller than c
+map<char, int> charIndex = {
+    {'$',0},
+    {'A',1},
+    {'C',2},
+    {'G',3},
+    {'T',4}
+};
 //--------------------------------------------------------------------------------
 
 //----------------------------------------------------------------------------------------------------------
@@ -235,19 +243,6 @@ void makeFMIndex_student(vector<vector<string>>& suffixes, char * (&L)){
     char this_F = '$';
     j=0;
     
-    //Calculation of F_count's
-/*
-    for(i=0;i<read_count*read_length;i++){
-        int count=0;
-        while(temp_suffixes[i][0]==this_F){
-            count++;i++;
-        }
-        F_count[j++]=(j==0)?count:count+1;
-        this_F = temp_suffixes[i][0];
-        if(temp_suffixes[i][0]=='T')
-            break;
-    }
-*/    
     //Calculation of L's and L_counts_student's
     for(i=0;i<read_count*read_length;i++){
         char ch = temp_suffixes[i][read_length-1];
@@ -256,34 +251,10 @@ void makeFMIndex_student(vector<vector<string>>& suffixes, char * (&L)){
             for(int k=0;k<5;k++)
                 L_counts_student[i][k]=L_counts_student[i-1][k];
         }
-        if (ch=='$')
-            L_counts_student[i][0]++;
-        else if(ch=='A')
-            L_counts_student[i][1]++;
-        else if(ch=='C')
-            L_counts_student[i][2]++;
-        else if(ch=='G')
-            L_counts_student[i][3]++;
-        else if(ch=='T')
-            L_counts_student[i][4]++;
-    }
-
-    // return L_counts_student;
-}
-
-int to_index(const char v)
-{
-    switch(v)
-    {
-    case '$': return 0;
-    case 'A': return 1;
-    case 'C': return 2;
-    case 'G': return 3;
-    case 'T': return 4;
-    // case 'T'+1: return 0;
-    default: return -1;
+        L_counts_student[i][charIndex.find(ch)->second]++;
     }
 }
+
 //-----------------------DO NOT CHANGE--------------------------------------------
 
 int main(int argc, char *argv[])
@@ -353,27 +324,27 @@ int main(int argc, char *argv[])
     C[3] = C[2]+L_counts_student[read_count*read_length-1][2];//G=moneysign+A+C
     C[4] = C[3]+L_counts_student[read_count*read_length-1][3];//G=moneysign+A+C+G
     
-// /*
+/*
     cout << endl;
     cout << "C table:" <<  endl;
     for (int i=0; i<5; i++)
         cout << C[i] << " ";
     cout << endl;
     cout << endl;
-// */
+*/
     int i = 0;
     int j = read_count*read_length-1;
     char c = queryString[queryString.length()-1];
-    i = C[to_index(c)] + 0;
-    j = C[to_index(c)] + L_counts_student[j][to_index(c)]-1;
+    i = C[charIndex.find(c)->second] + 0;
+    j = C[charIndex.find(c)->second] + L_counts_student[j][charIndex.find(c)->second]-1;
 
     if (i < j)
     {
         for (int k=queryString.length()-2; k>=0; k--)
         {
             c = queryString[k];
-            i = C[to_index(c)] + L_counts_student[i-1][to_index(c)];
-            j = C[to_index(c)] + L_counts_student[j][to_index(c)]-1;
+            i = C[charIndex.find(c)->second] + L_counts_student[i-1][charIndex.find(c)->second];
+            j = C[charIndex.find(c)->second] + L_counts_student[j][charIndex.find(c)->second]-1;
         
             if (i >= j)
                 break;
