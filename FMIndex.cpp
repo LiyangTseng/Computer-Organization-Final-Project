@@ -170,28 +170,13 @@ int main(int argc, char *argv[])
     
     //Calculate finl FM-Index
     makeFMIndex_student(suffixes_student, L_student);
-    
-    //----------------For debug purpose only-----------------
-/*  
-    for(int i=0;i<read_count*read_length;i++)        
-        cout<<L_student[i]<<"\t"<<pairs[i].second[0]<<","<<pairs[i].second[1]<<"\t"<<L_counts_student[i][0]<<","<<L_counts_student[i][1]<<","<<L_counts_student[i][2]<<","<<L_counts_student[i][3]<<","<<L_counts_student[i][4]<<endl;
-*/
-    //--------------------------------------------------
+
     //construct C table
     C[1] = L_counts_student[read_count*read_length-1][0];//A=moneysign
     C[2] = C[1]+L_counts_student[read_count*read_length-1][1];//C=moneysign+A
     C[3] = C[2]+L_counts_student[read_count*read_length-1][2];//G=moneysign+A+C
     C[4] = C[3]+L_counts_student[read_count*read_length-1][3];//G=moneysign+A+C+G
-    
-    //----------------For debug purpose only - C table -----------------
-/*
-    cout << endl;
-    cout << "C table:" <<  endl;
-    for (int i=0; i<5; i++)
-        cout << C[i] << " ";
-    cout << endl;
-    cout << endl;
-*/
+
     int i = 0;
     int j = read_count*read_length-1;
     char c = queryString[queryString.length()-1];
@@ -210,22 +195,13 @@ int main(int argc, char *argv[])
                 break;
         }
     }
-    // vector<int> counter;
-    // for (int k=i; k<=j; k++)
-    // {
-    //     //concept: if SA_Final_student[k][1] is new => increment counter 
-    //     //might be the key of performance!!
-    //     //https://stackoverflow.com/questions/3450860/check-if-a-stdvector-contains-a-certain-object
-        
-    //     if(std::find(counter.begin(), counter.end(), pairs[k].second[1]) == counter.end()) 
-    //         counter.push_back(pairs[k].second[1]);
-
-    // }
 
     sort(pairs.begin()+i,pairs.begin()+j, [](const pair<string, int*> & a, const pair<string, int*> & b) -> bool
     { 
         return a.second[1] > b.second[1]; 
     }); //小到大sort好 
+
+    
     int counter = 1;
     for (int k=i+1; k<=j; k++)
     {
@@ -242,7 +218,6 @@ int main(int argc, char *argv[])
     time_start = TimeValue_Start.tv_sec * 1000000 + TimeValue_Start.tv_usec;
     time_end = TimeValue_Final.tv_sec * 1000000 + TimeValue_Final.tv_usec;
     time_overhead_student = (time_end - time_start)/1000000.0;
-    // cout << "number of occurences: " << counter.size() << endl;
     cout << "number of occurences: " << counter << endl;
     cout << "time_overhead_student" << time_overhead_student << "seconds" << endl;
     //--------------------------------------------------
