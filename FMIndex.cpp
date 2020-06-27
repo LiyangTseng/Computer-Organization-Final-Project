@@ -163,7 +163,6 @@ int main(int argc, char *argv[])
     // -----------Your implementations------------------
 
 
-    gettimeofday(&TimeValue_Start, &TimeZone_Start); 
     
     // Generate read-wise suffixes
     generateSuffixes(suffixes_student, reads);
@@ -179,6 +178,9 @@ int main(int argc, char *argv[])
 
     int i = 0;
     int j = read_count*read_length-1;
+
+    gettimeofday(&TimeValue_Start, &TimeZone_Start); 
+
     char c = queryString[queryString.length()-1];
     i = C[charIndex.find(c)->second] + 0;
     j = C[charIndex.find(c)->second] + L_counts_student[j][charIndex.find(c)->second]-1;
