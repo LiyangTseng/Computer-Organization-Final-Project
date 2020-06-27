@@ -135,7 +135,7 @@ inline void makeFMIndex_student(vector<vector<string>>& suffixes, char * (&L)){
 
 int main(int argc, char *argv[])
 {
-    string read_data_file= "P1000.txt";   // input DATA
+    string read_data_file= "P10000.txt";   // input DATA
     string queryString=argv[1];
     vector<string> reads;
     inputReads(reads, read_data_file);//Input reads from file
@@ -210,17 +210,31 @@ int main(int argc, char *argv[])
                 break;
         }
     }
-    vector<int> counter;
-    for (int k=i; k<=j; k++)
-    {
-        //concept: if SA_Final_student[k][1] is new => increment counter 
-        //might be the key of performance!!
-        //https://stackoverflow.com/questions/3450860/check-if-a-stdvector-contains-a-certain-object
+    // vector<int> counter;
+    // for (int k=i; k<=j; k++)
+    // {
+    //     //concept: if SA_Final_student[k][1] is new => increment counter 
+    //     //might be the key of performance!!
+    //     //https://stackoverflow.com/questions/3450860/check-if-a-stdvector-contains-a-certain-object
         
-        if(std::find(counter.begin(), counter.end(), pairs[k].second[1]) == counter.end()) 
-            counter.push_back(pairs[k].second[1]);
+    //     if(std::find(counter.begin(), counter.end(), pairs[k].second[1]) == counter.end()) 
+    //         counter.push_back(pairs[k].second[1]);
 
+    // }
+
+    sort(pairs.begin()+i,pairs.begin()+j, [](const pair<string, int*> & a, const pair<string, int*> & b) -> bool
+    { 
+        return a.second[1] > b.second[1]; 
+    }); //小到大sort好 
+    int counter = 1;
+    for (int k=i+1; k<=j; k++)
+    {
+        if(pairs[k].second[1]==pairs[k-1].second[1])//只要前後兩個比對 
+        	continue;
+        else
+        	counter++;
     }
+
     //-----------Call your functions here--------------------
     gettimeofday(&TimeValue_Final, &TimeZone_Final);
 
@@ -228,7 +242,8 @@ int main(int argc, char *argv[])
     time_start = TimeValue_Start.tv_sec * 1000000 + TimeValue_Start.tv_usec;
     time_end = TimeValue_Final.tv_sec * 1000000 + TimeValue_Final.tv_usec;
     time_overhead_student = (time_end - time_start)/1000000.0;
-    cout << "number of occurences: " << counter.size() << endl;
+    // cout << "number of occurences: " << counter.size() << endl;
+    cout << "number of occurences: " << counter << endl;
     cout << "time_overhead_student" << time_overhead_student << "seconds" << endl;
     //--------------------------------------------------
 
